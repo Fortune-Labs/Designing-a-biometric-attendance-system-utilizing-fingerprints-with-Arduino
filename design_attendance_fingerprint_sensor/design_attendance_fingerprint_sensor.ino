@@ -1,12 +1,16 @@
+//Include Libraries
 #include "Adafruit_Fingerprint.h" //fingerprint library header file
 #include<EEPROM.h> //command for storing data
 #include<LiquidCrystal.h> //lcd header file
-LiquidCrystal lcd(8,9,10,11,12,13);
+const int rs = 12, en = 11, d4 = 7, d5 = 6, d6 = 5, d7 = 4;
+// const int rs = 8, en = 9, d4 = 10, d5 = 11, d6 = 12, d7 = 13;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 #include <SoftwareSerial.h>
 SoftwareSerial fingerPrint(2, 3); //for tx/rx communication between arduino & r305 fingerprint sensor
  
 #include <Wire.h>
 #include "RTClib.h" //library file for DS3231 RTC Module
+// #include "ds3231.h"
 RTC_DS3231 rtc;
  
 uint8_t id;
@@ -16,9 +20,9 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&fingerPrint);
 #define delete_ok 15
 #define forward 16
 #define reverse 17
-#define match 5
+#define match 10 //was 5
 #define indFinger 7
-#define buzzer 5
+#define buzzer 10 //was 5
  
 #define records 10 // 10 for 10 user
  
@@ -26,153 +30,149 @@ int user1,user2,user3,user4,user5,user6,user7,user8,user9,user10;
  
 DateTime now;
  
-void setup()
-{
-delay(1000);
-lcd.begin(16,2);
-Serial.begin(9600);
-pinMode(register_back, INPUT_PULLUP);
-pinMode(forward, INPUT_PULLUP);
-pinMode(reverse, INPUT_PULLUP);
-pinMode(delete_ok, INPUT_PULLUP);
-pinMode(match, INPUT_PULLUP);
-pinMode(buzzer, OUTPUT);
-pinMode(indFinger, OUTPUT);
-digitalWrite(buzzer, LOW);
-if(digitalRead(register_back) == 0)
-{
-digitalWrite(buzzer, HIGH);
-delay(500);
-digitalWrite(buzzer, LOW);
-lcd.clear();
-lcd.print("Please wait !");
-lcd.setCursor(0,1);
-lcd.print("Downloding Data");
- 
-Serial.println("Please wait");
-Serial.println("Downloding Data..");
-Serial.println();
- 
-Serial.print("S.No. ");
-for(int i=0;i<records;i++)
-{
-digitalWrite(buzzer, HIGH);
-delay(500);
-digitalWrite(buzzer, LOW);
-Serial.print(" User ID");
-Serial.print(i+1);
-Serial.print(" ");
-}
-Serial.println();
-int eepIndex=0;
-for(int i=0;i<30;i++)
-{
-if(i+1<10)
-Serial.print('0');
-Serial.print(i+1);
-Serial.print(" ");
-eepIndex=(i*7);
-download(eepIndex);
-eepIndex=(i*7)+210;
-download(eepIndex);
-eepIndex=(i*7)+420;
-download(eepIndex);
-eepIndex=(i*7)+630;
-download(eepIndex);
-eepIndex=(i*7)+840;
-download(eepIndex);
-eepIndex=(i*7)+1050;
-download(eepIndex);
-eepIndex=(i*7)+1260;
-download(eepIndex);
-eepIndex=(i*7)+1470;
-download(eepIndex);
-eepIndex=(i*7)+1680;
-download(eepIndex);
-Serial.println();
-}
-}
-if(digitalRead(delete_ok) == 0)
-{
-lcd.clear();
-lcd.print("Please Wait");
-lcd.setCursor(0,1);
-lcd.print("Reseting.....");
-for(int i=1000;i<1005;i++)
-EEPROM.write(i,0);
-for(int i=0;i<841;i++)
-EEPROM.write(i, 0xff);
-lcd.clear();
-lcd.print("System Reset");
-delay(1000);
-}
- 
-lcd.clear();
-lcd.print(" Fingerprint ");
-lcd.setCursor(0,1);
-lcd.print("Attendance System");
-delay(2000);
-lcd.clear();
- 
-digitalWrite(buzzer, HIGH);
-delay(500);
-digitalWrite(buzzer, LOW);
-for(int i=1000;i<1000+records;i++)
-{
-if(EEPROM.read(i) == 0xff)
-EEPROM.write(i,0);
-}
- 
-finger.begin(57600);
-Serial.begin(9600);
-lcd.clear();
-lcd.print("Finding Module..");
-lcd.setCursor(0,1);
-delay(2000);
-if (finger.verifyPassword())
-{
-Serial.println("Found fingerprint sensor!");
-lcd.clear();
-lcd.print(" Module Found");
-delay(2000);
-}
-else
-{
-Serial.println("Did not find fingerprint sensor :(");
-lcd.clear();
-lcd.print("Module Not Found");
-lcd.setCursor(0,1);
-lcd.print("Check Connections");
-while (1);
-}
- 
-if (! rtc.begin())
-Serial.println("Couldn't find RTC");
- 
-// rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
- 
-if (rtc.lostPower())
-{
-Serial.println("RTC is NOT running!");
-// following line sets the RTC to the date & time this sketch was compiled
-rtc.adjust(DateTime(2018, 6, 7, 11, 0, 0));
-// This line sets the RTC with an explicit date & time, for example to set
-// June 7, 2018 at 11am you would call:
-// rtc.adjust(DateTime(2018, 6, 7, 11, 0, 0));
-}
-lcd.setCursor(0,0);
-lcd.print(" Press Match to ");
-lcd.setCursor(0,1);
-lcd.print(" Start System");
-delay(3000);
- 
-user1=EEPROM.read(1000);
-user2=EEPROM.read(1001);
-user3=EEPROM.read(1002);
-user4=EEPROM.read(1003);
-user5=EEPROM.read(1004);
-lcd.clear();
-digitalWrite(indFinger, HIGH);
+void setup(){
+    delay(1000);
+    lcd.begin(16,2);
+    Serial.begin(9600);
+    pinMode(register_back, INPUT_PULLUP);
+    pinMode(forward, INPUT_PULLUP);
+    pinMode(reverse, INPUT_PULLUP);
+    pinMode(delete_ok, INPUT_PULLUP);
+    pinMode(match, INPUT_PULLUP);
+    pinMode(buzzer, OUTPUT);
+    pinMode(indFinger, OUTPUT);
+    digitalWrite(buzzer, LOW);
+    if(digitalRead(register_back) == 0){
+        digitalWrite(buzzer, HIGH);
+        delay(500);
+        digitalWrite(buzzer, LOW);
+        lcd.clear();
+        lcd.print("Please wait !");
+        lcd.setCursor(0,1);
+        lcd.print("Downloding Data");
+        
+        Serial.println("Please wait");
+        Serial.println("Downloding Data..");
+        Serial.println();
+        
+        Serial.print("S.No. ");
+        for(int i=0;i<records;i++){
+            digitalWrite(buzzer, HIGH);
+            delay(500);
+            digitalWrite(buzzer, LOW);
+            Serial.print(" User ID");
+            Serial.print(i+1);
+            Serial.print(" ");
+        }
+        Serial.println();
+        int eepIndex=0;
+        for(int i=0;i<30;i++){
+            if(i+1<10)
+            Serial.print('0');
+            Serial.print(i+1);
+            Serial.print(" ");
+            eepIndex=(i*7);
+            download(eepIndex);
+            eepIndex=(i*7)+210;
+            download(eepIndex);
+            eepIndex=(i*7)+420;
+            download(eepIndex);
+            eepIndex=(i*7)+630;
+            download(eepIndex);
+            eepIndex=(i*7)+840;
+            download(eepIndex);
+            eepIndex=(i*7)+1050;
+            download(eepIndex);
+            eepIndex=(i*7)+1260;
+            download(eepIndex);
+            eepIndex=(i*7)+1470;
+            download(eepIndex);
+            eepIndex=(i*7)+1680;
+            download(eepIndex);
+            Serial.println();
+        }
+    }
+    if(digitalRead(delete_ok) == 0)
+    {
+    lcd.clear();
+    lcd.print("Please Wait");
+    lcd.setCursor(0,1);
+    lcd.print("Reseting.....");
+    for(int i=1000;i<1005;i++)
+    EEPROM.write(i,0);
+    for(int i=0;i<841;i++)
+    EEPROM.write(i, 0xff);
+    lcd.clear();
+    lcd.print("System Reset");
+    delay(1000);
+    }
+    
+    lcd.clear();
+    lcd.print(" Fingerprint ");
+    lcd.setCursor(0,1);
+    lcd.print("Attendance System");
+    delay(2000);
+    lcd.clear();
+    
+    digitalWrite(buzzer, HIGH);
+    delay(500);
+    digitalWrite(buzzer, LOW);
+    for(int i=1000;i<1000+records;i++)
+    {
+    if(EEPROM.read(i) == 0xff)
+    EEPROM.write(i,0);
+    }
+    
+    finger.begin(57600);
+    Serial.begin(9600);
+    lcd.clear();
+    lcd.print("Finding Module..");
+    lcd.setCursor(0,1);
+    delay(2000);
+    if (finger.verifyPassword())
+    {
+    Serial.println("Found fingerprint sensor!");
+    lcd.clear();
+    lcd.print(" Module Found");
+    delay(2000);
+    }
+    else
+    {
+    Serial.println("Did not find fingerprint sensor :(");
+    lcd.clear();
+    lcd.print("Module Not Found");
+    lcd.setCursor(0,1);
+    lcd.print("Check Connections");
+    while (1);
+    }
+    
+    if (! rtc.begin())
+    Serial.println("Couldn't find RTC");
+    
+    // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    
+    if (rtc.lostPower())
+    {
+    Serial.println("RTC is NOT running!");
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(2018, 6, 7, 11, 0, 0));
+    // This line sets the RTC with an explicit date & time, for example to set
+    // June 7, 2018 at 11am you would call:
+    // rtc.adjust(DateTime(2018, 6, 7, 11, 0, 0));
+    }
+    lcd.setCursor(0,0);
+    lcd.print(" Press Match to ");
+    lcd.setCursor(0,1);
+    lcd.print(" Start System");
+    delay(3000);
+    
+    user1=EEPROM.read(1000);
+    user2=EEPROM.read(1001);
+    user3=EEPROM.read(1002);
+    user4=EEPROM.read(1003);
+    user5=EEPROM.read(1004);
+    lcd.clear();
+    digitalWrite(indFinger, HIGH);
  
 }
  
