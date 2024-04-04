@@ -1,6 +1,7 @@
 //Include Libraries
 #include "Adafruit_Fingerprint.h" //fingerprint library header file
 #include<EEPROM.h> //command for storing data
+ #include <Adafruit_I2CDevice.h>
 #include<LiquidCrystal.h> //lcd header file
 const int rs = 12, en = 11, d4 = 7, d5 = 6, d6 = 5, d7 = 4;
 // const int rs = 8, en = 9, d4 = 10, d5 = 11, d6 = 12, d7 = 13;
@@ -20,7 +21,7 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&fingerPrint);
 #define delete_ok 15
 #define forward 16
 #define reverse 17
-#define match 10 //was 5
+#define match 5 //was 5
 #define indFinger 7
 #define buzzer 10 //was 5
  
