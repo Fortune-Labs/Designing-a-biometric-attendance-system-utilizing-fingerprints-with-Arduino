@@ -22,7 +22,7 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&fingerPrint);
 #define forward 16
 #define reverse 17
 #define match 5 //was 5
-#define indFinger 7
+#define indFinger 9 //was 7
 #define buzzer 10 //was 5
  
 #define records 10 // 10 for 10 user
@@ -156,7 +156,7 @@ void setup(){
     {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
-    rtc.adjust(DateTime(2018, 6, 7, 11, 0, 0));
+    rtc.adjust(DateTime(2024, 6, 7, 11, 0, 0));
     // This line sets the RTC with an explicit date & time, for example to set
     // June 7, 2018 at 11am you would call:
     // rtc.adjust(DateTime(2018, 6, 7, 11, 0, 0));
