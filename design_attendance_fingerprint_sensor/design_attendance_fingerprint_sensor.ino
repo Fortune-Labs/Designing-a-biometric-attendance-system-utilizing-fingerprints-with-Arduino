@@ -3,8 +3,8 @@
 #include<EEPROM.h> //command for storing data
  #include <Adafruit_I2CDevice.h>
 #include<LiquidCrystal.h> //lcd header file
-const int rs = 12, en = 11, d4 = 7, d5 = 6, d6 = 5, d7 = 4;
-// const int rs = 8, en = 9, d4 = 10, d5 = 11, d6 = 12, d7 = 13;
+//onst int rs = 12, en = 11, d4 = 7, d5 = 6, d6 = 5, d7 = 4;
+const int rs = 8, en = 9, d4 = 10, d5 = 11, d6 = 12, d7 = 13;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 #include <SoftwareSerial.h>
 SoftwareSerial fingerPrint(2, 3); //for tx/rx communication between arduino & r305 fingerprint sensor
@@ -22,8 +22,8 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&fingerPrint);
 #define forward 16
 #define reverse 17
 #define match 5 //was 5
-#define indFinger 9 //was 7
-#define buzzer 10 //was 5
+#define indFinger 7 //was 7
+#define buzzer 5 //was 5
  
 #define records 10 // 10 for 10 user
  
@@ -156,7 +156,7 @@ void setup(){
     {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
-    rtc.adjust(DateTime(2024, 6, 7, 11, 0, 0));
+    rtc.adjust(DateTime(2024, 4, 3, 8, 0, 0));
     // This line sets the RTC with an explicit date & time, for example to set
     // June 7, 2018 at 11am you would call:
     // rtc.adjust(DateTime(2018, 6, 7, 11, 0, 0));
